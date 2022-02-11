@@ -1,4 +1,4 @@
-import ttt from "./ttt";
+import ttt from "../src/lib/ttt";
 
 test("TTT App", function () {
 
