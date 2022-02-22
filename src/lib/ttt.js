@@ -9,6 +9,7 @@ class TTT {
     #originalGeneratedCharSet = ''
     #errorCharPositions = []
     #desiredGenerator = 0;
+    #previousInputError = false;
     shakeErrorSeconds = 0.3;
 
 
@@ -188,12 +189,13 @@ class TTT {
             const firstLetterMatch = char === this.#charSet.charAt(0);
             if (firstLetterMatch && this.getCharSet().length > 0) {
                 this.#charSet = this.#charSet.slice(1);
+                this.#previousInputError = false;
                 return true;
             } else {
                 this.#getAndStoreErrorPosition(this.getOriginalCharSetLength(), this.getCharSet().length || 0);
                 // if (useStrictMode) this.#resetCharSetHalfway();
-                if (useStrictMode) this.#returnSomeCharSet(5);
-
+                if (useStrictMode && !!!this.#previousInputError) this.#returnSomeCharSet(5);
+                this.#previousInputError = true;
                 return false;
             }
         } else {

@@ -29,7 +29,7 @@ function App() {
 
     console.info({ typedChar })
 
-    let eliminateSuccess = ttt.eliminateFirstLetter(typedChar)
+    let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, true)
     if (!!!eliminateSuccess) {
       shakeError();
     }
