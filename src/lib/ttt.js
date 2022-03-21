@@ -47,64 +47,6 @@ class TTT {
     return result * 100;
   }
 
-  #removeDupSequential(string, sequence = 2) {
-    let sequenceGroup = "";
-
-    //TEST
-    console.log("fff");
-
-    for (let i = 0; i < string.length; i++) {
-      const eachChar = string[i];
-      const sequenceLeftPart = sequenceGroup[sequenceGroup.length - (sequence - 1)] || "";
-
-      const sequenceFormed = sequenceLeftPart + eachChar;
-
-      //TEST
-      console.log({
-        string,
-        sequenceGroup,
-        sequenceLeftPart,
-        eachChar,
-        sequenceFormed,
-      });
-
-      if (!sequenceGroup.includes(sequenceFormed)) sequenceGroup += eachChar;
-    }
-
-    return sequenceGroup;
-  }
-
-  #removeDupSequentialLPicking(string, sequence = 2) {
-    let sequenceGroup = "";
-
-    //TEST
-    console.log("fff");
-
-    for (let i = 0; i < string.length; i++) {
-      const eachChar = string[i];
-      const sequenceLeftPart = sequenceGroup[sequenceGroup.length - (sequence - 1)] || "";
-      const sequenceRightPart = string.substring(i, i + sequence - 1);
-
-      const sequenceFormed = sequenceLeftPart + eachChar;
-      const nextSequenceFormed = eachChar + sequenceRightPart;
-
-      //TEST
-      console.log({
-        string,
-        sequenceGroup,
-        sequenceLeftPart,
-        eachChar,
-        sequenceFormed,
-        nextSequenceFormed,
-      });
-
-      if (!sequenceGroup.includes(sequenceFormed) && !sequenceGroup.includes(nextSequenceFormed))
-        sequenceGroup += eachChar;
-    }
-
-    return sequenceGroup;
-  }
-
   #generateCharSetDefault(trainingCharacters, sequenceLevel = 2) {
     // TODO implement sequenceLevel
     let result = "";
@@ -191,6 +133,33 @@ class TTT {
     return res.split(/ +/).join(" ").trim();
   }
 
+  #removeDuplicateCharacterSequence(newCharSet) {
+    let cleanCharSet = "";
+    const lastCharacterIdx = newCharSet.length - 1;
+
+    for (let i = 0; i < lastCharacterIdx; i++) {
+      const currentChar = newCharSet[i];
+      const nextOfCurrentChar = newCharSet[i + 1] || "";
+      const lastCharOfClean = cleanCharSet.charAt(cleanCharSet.length - 1) || "";
+
+      const sequenceFormed = lastCharOfClean + currentChar;
+      const nextSequenceFormed = currentChar + nextOfCurrentChar;
+
+      if (
+        sequenceFormed.length === 2 &&
+        cleanCharSet.includes(sequenceFormed) &&
+        nextSequenceFormed.length === 2 &&
+        cleanCharSet.includes(nextSequenceFormed)
+      ) {
+        continue;
+      } else {
+        cleanCharSet += currentChar;
+      }
+    }
+
+    return cleanCharSet;
+  }
+
   #generateCharset(trainingCharacters, charSetGenerator) {
     let newCharSet = "";
 
@@ -200,14 +169,14 @@ class TTT {
         break;
       case 2:
         newCharSet = this.#generateCharSetLPicking(this.#baseTrainingCharacters);
-        newCharSet = this.#removeDupSequentialLPicking(newCharSet);
+        newCharSet = this.#removeDuplicateCharacterSequence(newCharSet);
         break;
       case 3:
         newCharSet = this.#generateCharSetRandomWords(this.#baseTrainingCharacters);
         break;
       default:
         newCharSet = this.#generateCharSetDefault(this.#baseTrainingCharacters);
-        newCharSet = this.#removeDupSequential(newCharSet);
+        newCharSet = this.#removeDuplicateCharacterSequence(newCharSet);
     }
 
     // Update originalGeneratedCharSet
