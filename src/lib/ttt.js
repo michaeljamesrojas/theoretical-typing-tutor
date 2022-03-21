@@ -1,7 +1,6 @@
 const Joi = require('joi');
 const randomWords = require('random-words')
 
-// Rule: reference to variables should only be from setters and getters 
 class TTT {
     #baseTrainingCharacters = '';
     #charSet = '';
@@ -47,6 +46,52 @@ class TTT {
     getEliminationPercentage() {
         const result = (this.getOriginalAndCurrentCharSetDiff()) / this.getOriginalCharSetLength();
         return result * 100;
+    }
+
+    #removeDupSequential(string, sequence = 2) {
+        let sequenceGroup = "";
+
+        //TEST
+        console.log("fff");
+
+        for (let i = 0; i < string.length; i++) {
+            const eachChar = string[i];
+            const sequenceLeftPart = (sequenceGroup[sequenceGroup.length - (sequence - 1)]) || '';
+
+            const sequenceFormed = sequenceLeftPart + eachChar;
+
+            //TEST
+            console.log({ string, sequenceGroup, sequenceLeftPart, eachChar, sequenceFormed });
+
+            if (!sequenceGroup.includes(sequenceFormed))
+                sequenceGroup += eachChar;
+        }
+
+        return sequenceGroup;
+    }
+
+    #removeDupSequentialLPicking(string, sequence = 2) {
+        let sequenceGroup = "";
+
+        //TEST
+        console.log("fff");
+
+        for (let i = 0; i < string.length; i++) {
+            const eachChar = string[i];
+            const sequenceLeftPart = (sequenceGroup[sequenceGroup.length - (sequence - 1)]) || '';
+            const sequenceRightPart = string.substring(i, i + sequence - 1);
+
+            const sequenceFormed = sequenceLeftPart + eachChar;
+            const nextSequenceFormed = eachChar + sequenceRightPart;
+
+            //TEST
+            console.log({ string, sequenceGroup, sequenceLeftPart, eachChar, sequenceFormed, nextSequenceFormed });
+
+            if (!sequenceGroup.includes(sequenceFormed) && !sequenceGroup.includes(nextSequenceFormed))
+                sequenceGroup += eachChar;
+        }
+
+        return sequenceGroup;
     }
 
     #generateCharSetDefault(trainingCharacters, sequenceLevel = 2) {
@@ -142,13 +187,16 @@ class TTT {
                 break;
             case 2:
                 newCharSet = this.#generateCharSetLPicking(this.#baseTrainingCharacters);
+                newCharSet = this.#removeDupSequentialLPicking(newCharSet)
                 break;
             case 3:
                 newCharSet = this.#generateCharSetRandomWords(this.#baseTrainingCharacters);
                 break;
             default:
                 newCharSet = this.#generateCharSetDefault(this.#baseTrainingCharacters);
+                newCharSet = this.#removeDupSequential(newCharSet)
         }
+
 
         // Update originalGeneratedCharSet
         this.#originalGeneratedCharSet = newCharSet;
