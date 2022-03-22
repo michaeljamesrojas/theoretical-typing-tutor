@@ -2,6 +2,8 @@ const Joi = require("joi");
 const randomWords = require("random-words");
 
 class TTT {
+  #generatorMode = { KEY_SEQUENCE: 0, RANDOM_WORDS: 1 };
+
   #baseTrainingCharacters = "";
   #charSet = "";
   #originalCharSetLength = 0;
@@ -16,6 +18,13 @@ class TTT {
     if (setBasedOnTrainingCharacters) {
       this.#originalCharSetLength = charSet.length;
     }
+  }
+
+  getModes() {
+    const mode = Object.keys(this.#generatorMode);
+    const representativeMode = mode.map((eachMode) => eachMode.split("_").join(" "));
+
+    return representativeMode;
   }
 
   getErrorCharPositions() {
@@ -164,14 +173,14 @@ class TTT {
     let newCharSet = "";
 
     switch (charSetGenerator) {
-      case 1:
-        newCharSet = this.#generateCharSetEqualSpreading(this.#baseTrainingCharacters);
-        break;
-      case 2:
+      // case 1:
+      //   newCharSet = this.#generateCharSetEqualSpreading(this.#baseTrainingCharacters);
+      //   break;
+      case this.#generatorMode.KEY_SEQUENCE:
         newCharSet = this.#generateCharSetLPicking(this.#baseTrainingCharacters);
         newCharSet = this.#removeDuplicateCharacterSequence(newCharSet);
         break;
-      case 3:
+      case this.#generatorMode.RANDOM_WORDS:
         newCharSet = this.#generateCharSetRandomWords(this.#baseTrainingCharacters);
         break;
       default:
