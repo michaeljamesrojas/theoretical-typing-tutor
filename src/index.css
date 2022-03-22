@@ -6,18 +6,44 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#root {
+  height: 100vh;
+  background: linear-gradient(0deg, rgba(107, 177, 213, 1) -43%, rgba(255, 255, 255, 1) 100%);
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+#core-trainer {
+  margin-top: 4rem !important;
+}
+
+#progress-bar {
+  border: 0.02rem solid;
+}
+
+#mode-selector {
+  width: 12rem !important;
+}
+
 .training-characters {
+  width: 17rem !important;
   border: 0.2rem solid red;
 }
 
 .characters-container {
   border: 0.2rem solid black;
   white-space: nowrap;
-  font-size: 3rem;
+  font-size: 4rem;
+  min-height: 4rem;
+}
+
+.type-area {
+  min-height: 7rem;
+  max-width: 7rem;
+  text-align: center;
+  font-size: 2rem;
 }
 
 .elimination-percentage {

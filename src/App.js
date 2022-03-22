@@ -1,13 +1,13 @@
 import "./App.css";
+import "bootstrap/dist/css/bootstrap.css";
 import { useState } from "react";
 import ttt from "./lib/ttt";
-import ProgressBar from "react-bootstrap/ProgressBar";
 
 function App() {
-  const [trainingCharacters, setTrainingCharacters] = useState(ttt.getTrainingCharacters());
+  const [trainingCharacters, setTrainingCharacters] = useState("abcdefghijklmnopqrstuvwxyz");
   const [charSet, setCharSet] = useState(ttt.getCharSet());
   const [shakerClass, setShakerClass] = useState("");
-  const [generatorType, setGeneratorType] = useState(3);
+  const [generatorType, setGeneratorType] = useState(1);
 
   var forceRender = () => {
     setTrainingCharacters(ttt.getTrainingCharacters());
@@ -82,32 +82,67 @@ function App() {
   };
 
   const generatorTypeChange = (e) => {
+    forceRender();
     setGeneratorType(parseInt(e.target.value));
   };
+
+  const progressValue = ttt.getEliminationPercentage() || 0;
+
   return (
     <>
-      <input
-        className=""
-        type="number"
-        onChange={generatorTypeChange}
-        value={generatorType}
-      ></input>
-      <input
-        className="training-characters"
-        type="text"
-        onChange={trainingCharactersChange}
-        value={trainingCharacters}
-      ></input>
+      <div className="row m-4 mb-5 text-center">
+        <div className="col">
+          <h1>Typing Tutor Theory</h1>
+        </div>
+      </div>
 
-      <br />
-      <input className="type-area" type="text" onChange={typeAreaChange} value={""}></input>
+      <div class="row m-3 justify-content-center">
+        <select
+          id="mode-selector"
+          className="form-select"
+          onChange={generatorTypeChange}
+          aria-label="select generator mode"
+        >
+          {ttt.getModes().map((eachMode, i) => (
+            <option key={i} value={i} selected={i === generatorType}>
+              {eachMode}
+            </option>
+          ))}
+        </select>
 
-      <ProgressBar variant="success" now={40} />
+        <input
+          className="training-characters"
+          type="text"
+          onChange={trainingCharactersChange}
+          value={trainingCharacters}
+        />
+      </div>
 
-      <h1 className={`characters-container ${shakerClass}`}>
-        <pre>{getHighlightedCharSet(charSet, ttt.getErrorCharPositions())}</pre>
-      </h1>
-      <h1 className="elimination-percentage">{Math.round(ttt.getEliminationPercentage()) || 0}%</h1>
+      <div id="core-trainer" class="d-flex mx-5 align-items-center bd-highlight">
+        <div class="p-2 flex-shrink-1 bd-highlight">
+          <input className="type-area" type="text" onChange={typeAreaChange} value={""}></input>
+        </div>
+
+        <div class="p-2 w-100 bd-highlight overflow-hidden">
+          <h1 className={`m-0 characters-container ${shakerClass}`}>
+            <pre className="m-0 overflow-hidden">
+              {getHighlightedCharSet(charSet, ttt.getErrorCharPositions())}
+            </pre>
+          </h1>
+
+          <div id="progress-bar" class="progress">
+            <div
+              class="progress-bar bg-success"
+              role="progressbar"
+              style={{ width: `${progressValue}%`, margin: "auto" }}
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              {Math.round(progressValue)}%
+            </div>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
