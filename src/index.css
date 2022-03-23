@@ -8,11 +8,31 @@ body {
 
 #root {
   height: 100vh;
-  background: linear-gradient(0deg, rgba(107, 177, 213, 1) -43%, rgba(255, 255, 255, 1) 100%);
+  /* background: linear-gradient(0deg, rgba(107, 177, 213, 1) -43%, rgba(255, 255, 255, 1) 100%); */
+
+  background-color: #f9c5d1;
+  background-image: linear-gradient(163deg, #f9c5d1 0%, #9795ef 74%);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+}
+
+div[role="progressbar"] {
+  background-color: rgb(30, 30, 30) !important;
+}
+
+.curveHeading {
+  height: 200%;
+  min-width: 120% !important;
+  top: -2rem;
+  left: -10%;
+  background: rgb(76, 150, 222);
+  /* background: linear-gradient(0deg, rgba(76, 150, 222, 1) 0%, rgba(240, 240, 240, 1) 100%); */
+  background: linear-gradient(180deg, rgb(30 30 30) 68%, rgba(240, 240, 240, 1) 207%);
+  border-bottom-left-radius: 130%;
+  border-bottom-right-radius: 130%;
+  box-shadow: 0px 4px 11px -1px black;
 }
 
 #core-trainer {
@@ -29,11 +49,13 @@ code {
 
 .training-characters {
   width: 17rem !important;
-  border: 0.2rem solid red;
+  /* border: 0.2rem solid red; */
 }
 
 .characters-container {
   border: 0.2rem solid black;
+  border-left: 0.15rem dashed;
+  border-left-style: dashed;
   white-space: nowrap;
   font-size: 4rem;
   min-height: 4rem;
@@ -53,6 +75,16 @@ code {
 
 .shakeIt {
   animation: shake 0.3s;
+}
+
+.growFade {
+  animation: growFade 0.6s;
+}
+
+#growFade {
+  visibility: hidden;
+  position: absolute !important;
+  font-size: 3rem;
 }
 
 @keyframes shake {
@@ -88,5 +120,22 @@ code {
   }
   100% {
     transform: translate(1px, -2px) rotate(-1deg);
+  }
+}
+
+@keyframes growFade {
+  0% {
+    visibility: visible;
+    transform: scale(1);
+    opacity: 1;
+    /* display: block; */
+  }
+  75% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+    /* display: none; */
   }
 }
