@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/theoretical-typing-tutor/static/css/main.6b97fbc0.css",
+    "main.js": "/theoretical-typing-tutor/static/js/main.f01d2f2c.js",
+    "static/js/787.324a3c92.chunk.js": "/theoretical-typing-tutor/static/js/787.324a3c92.chunk.js",
+    "index.html": "/theoretical-typing-tutor/index.html",
+    "main.6b97fbc0.css.map": "/theoretical-typing-tutor/static/css/main.6b97fbc0.css.map",
+    "main.f01d2f2c.js.map": "/theoretical-typing-tutor/static/js/main.f01d2f2c.js.map",
+    "787.324a3c92.chunk.js.map": "/theoretical-typing-tutor/static/js/787.324a3c92.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6b97fbc0.css",
+    "static/js/main.f01d2f2c.js"
+  ]
+}
