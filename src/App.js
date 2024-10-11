@@ -1,7 +1,6 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState } from "react";
-import ttt from "./lib/ttt";
+import { useState, useEffect } from "react";import ttt from "./lib/ttt";
 import TypingIndicator from "./typingIndicator";
 
 function App() {
@@ -10,6 +9,11 @@ function App() {
   const [shakerClass, setShakerClass] = useState("");
   const [generatorType, setGeneratorType] = useState(1);
   const [typedChar, setTypedChar] = useState("");
+
+  useEffect(() => {
+    ttt.setTrainingCharacters(trainingCharacters, generatorType);
+    setCharSet(ttt.getCharSet());
+  }, []);
 
   var forceRender = () => {
     setTrainingCharacters(ttt.getTrainingCharacters());
