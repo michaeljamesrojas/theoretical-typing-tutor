@@ -10,14 +10,24 @@ function App() {
   const [generatorType, setGeneratorType] = useState(1);
   const [typedChar, setTypedChar] = useState("");
   const inputRef = useRef(null);
+  const [returnCharSetAmount, setReturnCharSetAmount] = useState(5);
+
 
   useEffect(() => {
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
+    ttt.setReturnCharSetAmount(returnCharSetAmount);
     setCharSet(ttt.getCharSet());
     if (inputRef.current) {
       inputRef.current.focus();
     }
   }, []);
+
+  const handleReturnCharSetAmountChange = (e) => {
+    const amount = parseInt(e.target.value, 10);
+    setReturnCharSetAmount(amount);
+    ttt.setReturnCharSetAmount(amount);
+  };
+  
 
   var forceRender = () => {
     setTrainingCharacters(ttt.getTrainingCharacters());
@@ -127,6 +137,16 @@ function App() {
           onChange={trainingCharactersChange}
           value={trainingCharacters}
         />
+
+        <input
+            className="return-char-set-amount"
+            type="number"
+            min="0"
+            max="100"
+            onChange={handleReturnCharSetAmountChange}
+            value={returnCharSetAmount}
+            placeholder="Return char set amount"
+          />
       </div>
 
       <div id="core-trainer" className="d-flex mx-5 align-items-center bd-highlight">

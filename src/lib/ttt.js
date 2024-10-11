@@ -12,6 +12,14 @@ class TTT {
   #desiredGenerator = 0;
   #previousInputError = false;
   shakeErrorSeconds = 0.3;
+  #returnCharSetAmount = 5;
+
+  setReturnCharSetAmount(amount) {
+    const { error } = Joi.number().min(0).max(100).required().validate(amount);
+    if (!error) {
+      this.#returnCharSetAmount = amount;
+    }
+  }  
 
   #setCharSet(charSet, setBasedOnTrainingCharacters = false) {
     this.#charSet = charSet;
@@ -235,7 +243,7 @@ class TTT {
           this.getCharSet().length || 0
         );
         // if (useStrictMode) this.#resetCharSetHalfway();
-        if (useStrictMode && !!!this.#previousInputError) this.#returnSomeCharSet(5);
+        if (useStrictMode && !!!this.#previousInputError) this.#returnSomeCharSet(this.#returnCharSetAmount);
         this.#previousInputError = true;
         return false;
       }

@@ -89,6 +89,10 @@ div[role="progressbar"] {
   font-size: 3rem;
 }
 
+.return-char-set-amount {
+  width: 10% !important;
+}
+
 @keyframes shake {
   0% {
     transform: translate(1px, 1px) rotate(0deg);
