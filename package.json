@@ -2,6 +2,7 @@
   "name": "tutor",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://michaeljamesrojas.github.io/theoretical-typing-tutor",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.1",
     "@testing-library/react": "^12.1.2",
@@ -16,6 +17,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --coverage",
@@ -41,6 +44,7 @@
     ]
   },
   "devDependencies": {
+    "gh-pages": "^6.1.1",
     "jest": "^27.4.7"
   }
 }
