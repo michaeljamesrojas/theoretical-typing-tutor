@@ -1,6 +1,6 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState, useEffect } from "react";import ttt from "./lib/ttt";
+import { useState, useEffect, useRef } from "react";import ttt from "./lib/ttt";
 import TypingIndicator from "./typingIndicator";
 
 function App() {
@@ -9,10 +9,14 @@ function App() {
   const [shakerClass, setShakerClass] = useState("");
   const [generatorType, setGeneratorType] = useState(1);
   const [typedChar, setTypedChar] = useState("");
+  const inputRef = useRef(null);
 
   useEffect(() => {
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
     setCharSet(ttt.getCharSet());
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   }, []);
 
   var forceRender = () => {
@@ -127,7 +131,7 @@ function App() {
 
       <div id="core-trainer" className="d-flex mx-5 align-items-center bd-highlight">
         <div className="p-2 flex-shrink-1 bd-highlight position-relative">
-          <input className="type-area" type="text" onChange={typeAreaChange} value={""}></input>
+          <input ref={inputRef} className="type-area" type="text" onChange={typeAreaChange} value={""}></input>
           <TypingIndicator key={Date.now()} toDisplay={typedChar} />
         </div>
 
