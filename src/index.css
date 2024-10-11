@@ -84,6 +84,8 @@ div[role="progressbar"] {
 #growFade {
   visibility: hidden;
   position: absolute !important;
+  left: 4.4rem !important;
+  top: 1.5rem !important;
   font-size: 3rem;
 }
 
@@ -126,16 +128,14 @@ div[role="progressbar"] {
 @keyframes growFade {
   0% {
     visibility: visible;
-    transform: scale(1);
+    transform: scale(1) translateX(-20);
     opacity: 1;
-    /* display: block; */
   }
   75% {
     opacity: 0.8;
   }
   100% {
-    transform: scale(2);
+    transform: scale(2) translateX(-50px);
     opacity: 0;
-    /* display: none; */
   }
 }
