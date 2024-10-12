@@ -177,6 +177,16 @@ class TTT {
     return cleanCharSet;
   }
 
+  #scrambleTrainingCharacters(characters) {
+    const charArray = characters.split('');
+    for (let i = charArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [charArray[i], charArray[j]] = [charArray[j], charArray[i]];
+    }
+    return charArray.join('');
+  }
+  
+
   #generateCharset(trainingCharacters, charSetGenerator) {
     let newCharSet = "";
 
@@ -212,7 +222,13 @@ class TTT {
       this.#desiredGenerator = charSetGenerator;
 
       // Set new charSet
-      this.#baseTrainingCharacters = trainingCharacters;
+      // this.#baseTrainingCharacters = trainingCharacters;
+
+      // Scramble the training characters
+      this.#baseTrainingCharacters = this.#scrambleTrainingCharacters(
+        trainingCharacters
+      );
+
       let newCharSet = "";
 
       newCharSet = this.#generateCharset(trainingCharacters, charSetGenerator);
