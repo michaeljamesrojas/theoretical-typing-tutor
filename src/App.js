@@ -10,7 +10,7 @@ function App() {
   const [generatorType, setGeneratorType] = useState(1);
   const [typedChar, setTypedChar] = useState("");
   const inputRef = useRef(null);
-  const [returnCharSetAmount, setReturnCharSetAmount] = useState(5);
+  const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
 
 
   useEffect(() => {
