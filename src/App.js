@@ -46,11 +46,15 @@ function App() {
 
   const typeAreaChange = (e) => {
     const typedChar = e.target.value;
-
     setTypedChar(typedChar);
 
     let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, true);
-    if (!!!eliminateSuccess) {
+    if (eliminateSuccess) {
+      // Play a random note from pianoNotes when correct
+      const notes = Object.values(pianoNotes);
+      const randomNote = notes[Math.floor(Math.random() * notes.length)];
+      playNote(randomNote);
+    } else {
       shakeError();
     }
     forceRender();
@@ -180,3 +184,31 @@ function App() {
 }
 
 export default App;
+
+const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const pianoNotes = {
+  'C4': 261.63,
+  'D4': 293.66,
+  'E4': 329.63,
+  'F4': 349.23,
+  'G4': 392.00,
+  'A4': 440.00,
+  'B4': 493.88
+};
+
+const playNote = (frequency) => {
+  const oscillator = audioContext.createOscillator();
+  const gainNode = audioContext.createGain();
+  
+  oscillator.type = 'sine';
+  oscillator.frequency.value = frequency;
+  
+  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+  
+  oscillator.connect(gainNode);
+  gainNode.connect(audioContext.destination);
+  
+  oscillator.start();
+  oscillator.stop(audioContext.currentTime + 0.5);
+};
