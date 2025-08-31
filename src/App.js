@@ -1,6 +1,7 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState, useEffect, useRef } from "react";import ttt from "./lib/ttt";
+import { useState, useEffect, useRef } from "react";
+import ttt from "./lib/ttt";
 import TypingIndicator from "./typingIndicator";
 
 function App() {
@@ -11,6 +12,15 @@ function App() {
   const [typedChar, setTypedChar] = useState("");
   const inputRef = useRef(null);
   const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
+  
+  // Timer and WPM states
+  const [timerActive, setTimerActive] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(30);
+  const [startTime, setStartTime] = useState(null);
+  const [totalKeysTyped, setTotalKeysTyped] = useState(0);
+  const [correctKeysTyped, setCorrectKeysTyped] = useState(0);
+  const [timerFinished, setTimerFinished] = useState(false);
+  const timerRef = useRef(null);
 
 
   useEffect(() => {
@@ -22,10 +32,73 @@ function App() {
     }
   }, []);
 
+  // Timer effect
+  useEffect(() => {
+    if (timerActive && timeRemaining > 0) {
+      timerRef.current = setTimeout(() => {
+        setTimeRemaining(prev => prev - 1);
+      }, 1000);
+    } else if (timeRemaining === 0 && timerActive) {
+      setTimerActive(false);
+      setTimerFinished(true);
+    }
+
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [timerActive, timeRemaining]);
+
+  // Reset timer when settings change
+  const resetTimer = () => {
+    setTimerActive(false);
+    setTimeRemaining(30);
+    setStartTime(null);
+    setTotalKeysTyped(0);
+    setCorrectKeysTyped(0);
+    setTimerFinished(false);
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
+    // Focus back to typing area
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
+  // Start timer on first correct keystroke
+  const startTimer = () => {
+    if (!timerActive && !timerFinished) {
+      setTimerActive(true);
+      setStartTime(Date.now());
+    }
+  };
+
+  // Calculate WPM
+  const calculateWPM = (keyCount, timeElapsedInMinutes) => {
+    if (timeElapsedInMinutes === 0) return 0;
+    return Math.round((keyCount / 5) / timeElapsedInMinutes);
+  };
+
+  const getCurrentWPM = () => {
+    if (!startTime || timeRemaining === 30) return { raw: 0, net: 0 };
+    const timeElapsedSeconds = 30 - timeRemaining;
+    const timeElapsedMinutes = timeElapsedSeconds / 60;
+    
+    // Don't calculate WPM until at least 3 seconds have passed to avoid extreme values
+    if (timeElapsedSeconds < 3) return { raw: 0, net: 0 };
+    
+    const rawWPM = calculateWPM(totalKeysTyped, timeElapsedMinutes);
+    const netWPM = calculateWPM(correctKeysTyped, timeElapsedMinutes);
+    return { raw: rawWPM, net: netWPM };
+  };
+
   const handleReturnCharSetAmountChange = (e) => {
     const amount = parseInt(e.target.value, 10);
     setReturnCharSetAmount(amount);
     ttt.setReturnCharSetAmount(amount);
+    resetTimer();
   };
   
 
@@ -42,14 +115,29 @@ function App() {
     ttt.setTrainingCharacters(trainingChars, generatorType);
 
     setCharSet(ttt.getCharSet());
+    resetTimer();
   };
 
   const typeAreaChange = (e) => {
     const typedChar = e.target.value;
     setTypedChar(typedChar);
 
+    // Don't process if timer has finished
+    if (timerFinished) {
+      return;
+    }
+
+    // Count all keystrokes
+    setTotalKeysTyped(prev => prev + 1);
+
     let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, true);
     if (eliminateSuccess) {
+      // Start timer on first correct keystroke
+      startTimer();
+      
+      // Count correct keystrokes
+      setCorrectKeysTyped(prev => prev + 1);
+      
       // Play a random note from pianoNotes when correct
       const notes = Object.values(pianoNotes);
       const randomNote = notes[Math.floor(Math.random() * notes.length)];
@@ -108,9 +196,11 @@ function App() {
   const generatorTypeChange = (e) => {
     forceRender();
     setGeneratorType(parseInt(e.target.value));
+    resetTimer();
   };
 
   const progressValue = ttt.getEliminationPercentage() || 0;
+  const currentWPM = getCurrentWPM();
 
   return (
     <>
@@ -118,6 +208,35 @@ function App() {
         <div className="curveHeading position-absolute"></div>
         <div className="col position-relative">
           <h1 className="text-white">Typing Tutor Theory</h1>
+        </div>
+      </div>
+
+      {/* Timer and WPM Display */}
+      <div className="row m-3 justify-content-center">
+        <div className="col-auto">
+          <div className="d-flex align-items-center gap-4">
+            <div className="text-center">
+              <h5 className="mb-1 text-primary">Timer</h5>
+              <div className={`badge fs-6 ${timeRemaining <= 10 && timerActive ? 'bg-warning text-dark' : timerFinished ? 'bg-danger' : 'bg-secondary'}`}>
+                {timerFinished ? 'Time Up!' : `${timeRemaining}s`}
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <h6 className="mb-1 text-success">Raw WPM</h6>
+              <div className="badge bg-success fs-6">
+                {currentWPM.raw}
+              </div>
+            </div>
+            
+            <div className="text-center">
+              <h6 className="mb-1 text-info">Net WPM</h6>
+              <div className="badge bg-info fs-6">
+                {currentWPM.net}
+              </div>
+            </div>
+
+          </div>
         </div>
       </div>
 
@@ -177,6 +296,19 @@ function App() {
               {Math.round(progressValue)}%
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Reset Button at Bottom */}
+      <div className="row m-3 justify-content-center">
+        <div className="col-auto">
+          <button 
+            className="btn btn-primary"
+            onClick={resetTimer}
+            title="Reset Timer and WPM"
+          >
+            &#x21BB; {/* Unicode reload/refresh icon */}
+          </button>
         </div>
       </div>
     </>
