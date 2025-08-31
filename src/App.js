@@ -50,7 +50,7 @@ function App() {
     };
   }, [timerActive, timeRemaining]);
 
-  // Reset timer when settings change
+  // Reset timer when settings change (without focusing)
   const resetTimer = () => {
     setTimerActive(false);
     setTimeRemaining(30);
@@ -61,6 +61,14 @@ function App() {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
+  };
+
+  // Reset everything including words and focus back to typing area (for reset button)
+  const handleResetButton = () => {
+    resetTimer();
+    // Reset the character set/words in queue
+    ttt.setTrainingCharacters(trainingCharacters, generatorType);
+    setCharSet(ttt.getCharSet());
     // Focus back to typing area
     if (inputRef.current) {
       inputRef.current.focus();
@@ -304,7 +312,7 @@ function App() {
         <div className="col-auto">
           <button 
             className="btn btn-primary"
-            onClick={resetTimer}
+            onClick={handleResetButton}
             title="Reset Timer and WPM"
           >
             &#x21BB; {/* Unicode reload/refresh icon */}
