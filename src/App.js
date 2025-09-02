@@ -2,7 +2,11 @@ import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 import { useState, useEffect, useRef } from "react";
 import ttt from "./lib/ttt";
-import TypingIndicator from "./typingIndicator";
+import Timer from "./components/Timer";
+import SettingsPanel from "./components/SettingsPanel";
+import TypingArea from "./components/TypingArea";
+import useAudioService from "./hooks/useAudioService";
+import useTimer from "./hooks/useTimer";
 
 function App() {
   const [trainingCharacters, setTrainingCharacters] = useState("abcdefghijklmnopqrstuvwxyz");
@@ -12,19 +16,20 @@ function App() {
   const [typedChar, setTypedChar] = useState("");
   const inputRef = useRef(null);
   const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
-  
-  // Timer and WPM states
-  const [timerActive, setTimerActive] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState(30);
-  const [startTime, setStartTime] = useState(null);
-  const [totalKeysTyped, setTotalKeysTyped] = useState(0);
-  const [correctKeysTyped, setCorrectKeysTyped] = useState(0);
-  const [timerFinished, setTimerFinished] = useState(false);
-  const timerRef = useRef(null);
-  
-  // Error handling mode toggle (false = skip errors, true = strict mode with penalties)
   const [strictErrorMode, setStrictErrorMode] = useState(false);
-
+  
+  // Custom hooks
+  const { playRandomNote } = useAudioService();
+  const {
+    timerActive,
+    timeRemaining,
+    timerFinished,
+    startTimer,
+    resetTimer,
+    incrementTotalKeys,
+    incrementCorrectKeys,
+    getCurrentWPM
+  } = useTimer(30);
 
   useEffect(() => {
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
@@ -33,76 +38,15 @@ function App() {
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Timer effect
-  useEffect(() => {
-    if (timerActive && timeRemaining > 0) {
-      timerRef.current = setTimeout(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    } else if (timeRemaining === 0 && timerActive) {
-      setTimerActive(false);
-      setTimerFinished(true);
-    }
-
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [timerActive, timeRemaining]);
-
-  // Reset timer when settings change (without focusing)
-  const resetTimer = () => {
-    setTimerActive(false);
-    setTimeRemaining(30);
-    setStartTime(null);
-    setTotalKeysTyped(0);
-    setCorrectKeysTyped(0);
-    setTimerFinished(false);
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-  };
-
-  // Reset everything including words and focus back to typing area (for reset button)
   const handleResetButton = () => {
     resetTimer();
-    // Reset the character set/words in queue
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
     setCharSet(ttt.getCharSet());
-    // Focus back to typing area
     if (inputRef.current) {
       inputRef.current.focus();
     }
-  };
-
-  // Start timer on first correct keystroke
-  const startTimer = () => {
-    if (!timerActive && !timerFinished) {
-      setTimerActive(true);
-      setStartTime(Date.now());
-    }
-  };
-
-  // Calculate WPM
-  const calculateWPM = (keyCount, timeElapsedInMinutes) => {
-    if (timeElapsedInMinutes === 0) return 0;
-    return Math.round((keyCount / 5) / timeElapsedInMinutes);
-  };
-
-  const getCurrentWPM = () => {
-    if (!startTime || timeRemaining === 30) return { raw: 0, net: 0 };
-    const timeElapsedSeconds = 30 - timeRemaining;
-    const timeElapsedMinutes = timeElapsedSeconds / 60;
-    
-    // Don't calculate WPM until at least 3 seconds have passed to avoid extreme values
-    if (timeElapsedSeconds < 3) return { raw: 0, net: 0 };
-    
-    const rawWPM = calculateWPM(totalKeysTyped, timeElapsedMinutes);
-    const netWPM = calculateWPM(correctKeysTyped, timeElapsedMinutes);
-    return { raw: rawWPM, net: netWPM };
   };
 
   const handleReturnCharSetAmountChange = (e) => {
@@ -111,20 +55,15 @@ function App() {
     ttt.setReturnCharSetAmount(amount);
     resetTimer();
   };
-  
 
-  var forceRender = () => {
-    setTrainingCharacters(ttt.getTrainingCharacters());
+  const forceRender = () => {
     setCharSet(ttt.getCharSet());
   };
 
   const trainingCharactersChange = (e) => {
     const trainingChars = e.target.value;
-
     setTrainingCharacters(trainingChars);
-
     ttt.setTrainingCharacters(trainingChars, generatorType);
-
     setCharSet(ttt.getCharSet());
     resetTimer();
   };
@@ -133,85 +72,39 @@ function App() {
     const typedChar = e.target.value;
     setTypedChar(typedChar);
 
-    // Don't process if timer has finished
     if (timerFinished) {
       return;
     }
 
-    // Count all keystrokes
-    setTotalKeysTyped(prev => prev + 1);
+    incrementTotalKeys();
 
     let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, strictErrorMode);
     if (eliminateSuccess) {
-      // Start timer on first correct keystroke
       startTimer();
-      
-      // Count correct keystrokes
-      setCorrectKeysTyped(prev => prev + 1);
-      
-      // Play a random note from pianoNotes when correct
-      const notes = Object.values(pianoNotes);
-      const randomNote = notes[Math.floor(Math.random() * notes.length)];
-      playNote(randomNote);
+      incrementCorrectKeys();
+      playRandomNote();
     } else {
       shakeError();
       
-      // In non-strict mode, still advance to next character on error
       if (!strictErrorMode) {
-        ttt.eliminateFirstLetter(ttt.getFirstLetter(), false); // Force advance
+        ttt.eliminateFirstLetter(ttt.getFirstLetter(), false);
       }
     }
     forceRender();
   };
 
-  const shakeError = (e) => {
+  const shakeError = () => {
     setShakerClass("shakeIt");
-
     setTimeout(() => {
       setShakerClass("");
     }, 1000 * ttt.shakeErrorSeconds);
   };
 
-  const getHighlightedCharSet = (charSet, highlightLocations, color = "red") => {
-    let newCharSet = charSet;
-
-    if (
-      Array.isArray(highlightLocations) &&
-      highlightLocations.length > 0 &&
-      typeof color === "string"
-    ) {
-      newCharSet = <></>;
-
-      for (let i = 0; i < charSet.length; i++) {
-        const currentChar = charSet[i];
-        if (
-          !!!highlightLocations.includes(
-            i + (ttt.getOriginalCharSetLength() - ttt.getCharSet().length)
-          )
-        ) {
-          newCharSet = (
-            <>
-              {newCharSet}
-              {currentChar}
-            </>
-          );
-        } else {
-          newCharSet = (
-            <>
-              {newCharSet}
-              <span style={{ color }}>{currentChar}</span>
-            </>
-          );
-        }
-      }
-    }
-
-    return <>{newCharSet}</>;
-  };
-
   const generatorTypeChange = (e) => {
-    forceRender();
-    setGeneratorType(parseInt(e.target.value));
+    const newType = parseInt(e.target.value);
+    setGeneratorType(newType);
+    ttt.setTrainingCharacters(trainingCharacters, newType);
+    setCharSet(ttt.getCharSet());
     resetTimer();
   };
 
@@ -227,149 +120,39 @@ function App() {
         </div>
       </div>
 
-      {/* Timer and WPM Display */}
-      <div className="row m-3 justify-content-center">
-        <div className="col-auto">
-          <div className="d-flex align-items-center gap-4">
-            <div className="text-center">
-              <h5 className="mb-1 text-primary">Timer</h5>
-              <div className={`badge fs-6 ${timeRemaining <= 10 && timerActive ? 'bg-warning text-dark' : timerFinished ? 'bg-danger' : 'bg-secondary'}`}>
-                {timerFinished ? 'Time Up!' : `${timeRemaining}s`}
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <h6 className="mb-1 text-success">Raw WPM</h6>
-              <div className="badge bg-success fs-6">
-                {currentWPM.raw}
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <h6 className="mb-1 text-info">Net WPM</h6>
-              <div className="badge bg-info fs-6">
-                {currentWPM.net}
-              </div>
-            </div>
+      <Timer
+        timeRemaining={timeRemaining}
+        timerActive={timerActive}
+        timerFinished={timerFinished}
+        rawWPM={currentWPM.raw}
+        netWPM={currentWPM.net}
+      />
 
-          </div>
-        </div>
-      </div>
+      <SettingsPanel
+        generatorType={generatorType}
+        trainingCharacters={trainingCharacters}
+        returnCharSetAmount={returnCharSetAmount}
+        strictErrorMode={strictErrorMode}
+        modes={ttt.getModes()}
+        onGeneratorTypeChange={generatorTypeChange}
+        onTrainingCharactersChange={trainingCharactersChange}
+        onReturnCharSetAmountChange={handleReturnCharSetAmountChange}
+        onStrictErrorModeChange={(e) => setStrictErrorMode(e.target.checked)}
+      />
 
-      <div className="row m-3 justify-content-center">
-        <select
-          id="mode-selector"
-          className="form-select"
-          onChange={generatorTypeChange}
-          aria-label="select generator mode"
-        >
-          {ttt.getModes().map((eachMode, i) => (
-            <option key={i} value={i} selected={i === generatorType}>
-              {eachMode}
-            </option>
-          ))}
-        </select>
-
-        <input
-          className="training-characters"
-          type="text"
-          onChange={trainingCharactersChange}
-          value={trainingCharacters}
-        />
-
-        <input
-            className="return-char-set-amount"
-            type="number"
-            min="0"
-            max="100"
-            onChange={handleReturnCharSetAmountChange}
-            value={returnCharSetAmount}
-            placeholder="Return char set amount"
-          />
-
-        <div className="form-check">
-          <input
-            className="form-check-input"
-            type="checkbox"
-            id="strictModeToggle"
-            checked={strictErrorMode}
-            onChange={(e) => setStrictErrorMode(e.target.checked)}
-          />
-          <label className="form-check-label" htmlFor="strictModeToggle">
-            Strict Error Mode
-          </label>
-        </div>
-      </div>
-
-      <div id="core-trainer" className="d-flex mx-5 align-items-center bd-highlight">
-        <div className="p-2 flex-shrink-1 bd-highlight position-relative">
-          <input ref={inputRef} className="type-area" type="text" onChange={typeAreaChange} value={""}></input>
-          <TypingIndicator key={Date.now()} toDisplay={typedChar} />
-        </div>
-
-        <div className="p-2 w-100 bd-highlight overflow-hidden">
-          <h1 className={`m-0 characters-container ${shakerClass}`}>
-            <pre className="m-0 overflow-hidden">
-              {getHighlightedCharSet(charSet, ttt.getErrorCharPositions())}
-            </pre>
-          </h1>
-
-          <div id="progress-bar" className="progress">
-            <div
-              className="progress-bar bg-success"
-              role="progressbar"
-              style={{ width: `${progressValue}%`, margin: "auto" }}
-              aria-valuemin="0"
-              aria-valuemax="100"
-            >
-              {Math.round(progressValue)}%
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Reset Button at Bottom */}
-      <div className="row m-3 justify-content-center">
-        <div className="col-auto">
-          <button 
-            className="btn btn-primary"
-            onClick={handleResetButton}
-            title="Reset Timer and WPM"
-          >
-            &#x21BB; {/* Unicode reload/refresh icon */}
-          </button>
-        </div>
-      </div>
+      <TypingArea
+        inputRef={inputRef}
+        typedChar={typedChar}
+        charSet={charSet}
+        errorPositions={ttt.getErrorCharPositions()}
+        originalCharSetLength={ttt.getOriginalCharSetLength()}
+        shakerClass={shakerClass}
+        progressValue={progressValue}
+        onTypeAreaChange={typeAreaChange}
+        onReset={handleResetButton}
+      />
     </>
   );
 }
 
 export default App;
-
-const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-const pianoNotes = {
-  'C4': 261.63,
-  'D4': 293.66,
-  'E4': 329.63,
-  'F4': 349.23,
-  'G4': 392.00,
-  'A4': 440.00,
-  'B4': 493.88
-};
-
-const playNote = (frequency) => {
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  
-  oscillator.type = 'sine';
-  oscillator.frequency.value = frequency;
-  
-  gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-  gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-  
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-  
-  oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.5);
-};
