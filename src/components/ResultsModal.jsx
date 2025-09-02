@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 const ResultsModal = ({ 
   isOpen, 
@@ -11,13 +11,18 @@ const ResultsModal = ({
   onReset
 }) => {
   const tryAgainButtonRef = useRef(null);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
     if (isOpen && tryAgainButtonRef.current) {
-      // Focus the try again button when modal opens
+      // Disable the try again button for 1 second when modal opens
+      setIsButtonDisabled(true);
+
+      // Re-enable the button after 1 second and focus it
       setTimeout(() => {
+        setIsButtonDisabled(false);
         tryAgainButtonRef.current?.focus();
-      }, 100);
+      }, 1000);
     }
   }, [isOpen]);
 
@@ -178,6 +183,7 @@ const ResultsModal = ({
                 ref={tryAgainButtonRef}
                 type="button" 
                 className="btn btn-primary btn-sm" 
+                disabled={isButtonDisabled}
                 onClick={() => {
                   onReset();
                   onClose();
