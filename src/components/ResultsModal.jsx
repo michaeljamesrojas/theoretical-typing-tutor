@@ -22,7 +22,7 @@ const ResultsModal = ({
       setTimeout(() => {
         setIsButtonDisabled(false);
         tryAgainButtonRef.current?.focus();
-      }, 1000);
+      }, 600);
     }
   }, [isOpen]);
 

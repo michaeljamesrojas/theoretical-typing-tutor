@@ -21,7 +21,7 @@ function App() {
   const [showResultsModal, setShowResultsModal] = useState(false);
   
   // Custom hooks
-  const { playRandomNote } = useAudioService();
+  const { playRandomNote, playErrorTone } = useAudioService();
   const {
     timerActive,
     timeRemaining,
@@ -97,6 +97,7 @@ function App() {
       playRandomNote();
     } else {
       shakeError();
+      playErrorTone();
       
       if (!strictErrorMode) {
         ttt.eliminateFirstLetter(ttt.getFirstLetter(), false);
