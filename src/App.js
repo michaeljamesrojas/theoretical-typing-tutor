@@ -21,7 +21,7 @@ function App() {
   const [showResultsModal, setShowResultsModal] = useState(false);
   
   // Custom hooks
-  const { playRandomNote, playErrorTone } = useAudioService();
+  const { playRandomNote, playCharacterNote, playErrorTone } = useAudioService();
   const {
     timerActive,
     timeRemaining,
@@ -94,7 +94,7 @@ function App() {
     if (eliminateSuccess) {
       startTimer();
       incrementCorrectKeys();
-      playRandomNote();
+      playCharacterNote(typedChar);
     } else {
       shakeError();
       playErrorTone();
