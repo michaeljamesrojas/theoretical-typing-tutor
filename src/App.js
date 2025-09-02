@@ -5,6 +5,7 @@ import ttt from "./lib/ttt";
 import Timer from "./components/Timer";
 import SettingsPanel from "./components/SettingsPanel";
 import TypingArea from "./components/TypingArea";
+import ResultsModal from "./components/ResultsModal";
 import useAudioService from "./hooks/useAudioService";
 import useTimer from "./hooks/useTimer";
 
@@ -17,6 +18,7 @@ function App() {
   const inputRef = useRef(null);
   const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
   const [strictErrorMode, setStrictErrorMode] = useState(false);
+  const [showResultsModal, setShowResultsModal] = useState(false);
   
   // Custom hooks
   const { playRandomNote } = useAudioService();
@@ -24,6 +26,8 @@ function App() {
     timerActive,
     timeRemaining,
     timerFinished,
+    totalKeysTyped,
+    correctKeysTyped,
     startTimer,
     resetTimer,
     incrementTotalKeys,
@@ -40,8 +44,16 @@ function App() {
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Show results modal when timer finishes
+  useEffect(() => {
+    if (timerFinished) {
+      setShowResultsModal(true);
+    }
+  }, [timerFinished]);
+
   const handleResetButton = () => {
     resetTimer();
+    setShowResultsModal(false);
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
     setCharSet(ttt.getCharSet());
     if (inputRef.current) {
@@ -110,6 +122,7 @@ function App() {
 
   const progressValue = ttt.getEliminationPercentage() || 0;
   const currentWPM = getCurrentWPM();
+  const accuracy = totalKeysTyped > 0 ? Math.round((correctKeysTyped / totalKeysTyped) * 100) : 100;
 
   return (
     <>
@@ -149,6 +162,17 @@ function App() {
         shakerClass={shakerClass}
         progressValue={progressValue}
         onTypeAreaChange={typeAreaChange}
+        onReset={handleResetButton}
+      />
+
+      <ResultsModal 
+        isOpen={showResultsModal}
+        onClose={() => setShowResultsModal(false)}
+        netWPM={currentWPM.net}
+        rawWPM={currentWPM.raw}
+        accuracy={accuracy}
+        totalKeysTyped={totalKeysTyped}
+        correctKeysTyped={correctKeysTyped}
         onReset={handleResetButton}
       />
     </>

@@ -3,8 +3,7 @@
     "allow": [
       "Bash(npm start)",
       "Bash(npm install)",
-      "Bash(npm run build:*)",
-      "Bash(npm test:*)"
+      "Read(C:\\Users\\micha\\Downloads/**)"
     ],
     "deny": [],
     "ask": []
