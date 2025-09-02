@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TypingIndicator from '../typingIndicator';
 import CharacterDisplay from './CharacterDisplay';
 import ProgressDisplay from './ProgressDisplay';
+import BlurOverlay from './BlurOverlay';
 
 const TypingArea = ({
   inputRef,
@@ -14,15 +15,37 @@ const TypingArea = ({
   onTypeAreaChange,
   onReset
 }) => {
+  const [isTypingAreaFocused, setIsTypingAreaFocused] = useState(true);
+
+  const handleFocus = () => {
+    setIsTypingAreaFocused(true);
+  };
+
+  const handleBlur = () => {
+    setIsTypingAreaFocused(false);
+  };
+
+  const handleOverlayClick = () => {
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   return (
     <>
-      <div id="core-trainer" className="d-flex mx-5 align-items-center bd-highlight">
+      <div 
+        id="core-trainer" 
+        className="d-flex mx-5 align-items-center bd-highlight position-relative"
+        style={{ borderRadius: '12px' }}
+      >
         <div className="p-2 flex-shrink-1 bd-highlight position-relative">
           <input 
             ref={inputRef} 
             className="type-area" 
             type="text" 
             onChange={onTypeAreaChange} 
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             value=""
             autoFocus
           />
@@ -35,6 +58,11 @@ const TypingArea = ({
           originalCharSetLength={originalCharSetLength}
           currentCharSetLength={charSet.length}
           shakerClass={shakerClass}
+        />
+
+        <BlurOverlay 
+          isVisible={!isTypingAreaFocused}
+          onClick={handleOverlayClick}
         />
       </div>
 
