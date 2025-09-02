@@ -21,6 +21,9 @@ function App() {
   const [correctKeysTyped, setCorrectKeysTyped] = useState(0);
   const [timerFinished, setTimerFinished] = useState(false);
   const timerRef = useRef(null);
+  
+  // Error handling mode toggle (false = skip errors, true = strict mode with penalties)
+  const [strictErrorMode, setStrictErrorMode] = useState(false);
 
 
   useEffect(() => {
@@ -138,7 +141,7 @@ function App() {
     // Count all keystrokes
     setTotalKeysTyped(prev => prev + 1);
 
-    let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, true);
+    let eliminateSuccess = ttt.eliminateFirstLetter(typedChar, strictErrorMode);
     if (eliminateSuccess) {
       // Start timer on first correct keystroke
       startTimer();
@@ -152,6 +155,11 @@ function App() {
       playNote(randomNote);
     } else {
       shakeError();
+      
+      // In non-strict mode, still advance to next character on error
+      if (!strictErrorMode) {
+        ttt.eliminateFirstLetter(ttt.getFirstLetter(), false); // Force advance
+      }
     }
     forceRender();
   };
@@ -278,6 +286,19 @@ function App() {
             value={returnCharSetAmount}
             placeholder="Return char set amount"
           />
+
+        <div className="form-check">
+          <input
+            className="form-check-input"
+            type="checkbox"
+            id="strictModeToggle"
+            checked={strictErrorMode}
+            onChange={(e) => setStrictErrorMode(e.target.checked)}
+          />
+          <label className="form-check-label" htmlFor="strictModeToggle">
+            Strict Error Mode
+          </label>
+        </div>
       </div>
 
       <div id="core-trainer" className="d-flex mx-5 align-items-center bd-highlight">
