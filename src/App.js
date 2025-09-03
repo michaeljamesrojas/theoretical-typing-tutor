@@ -5,6 +5,7 @@ import ttt from "./lib/ttt";
 import Timer from "./components/Timer";
 import SettingsPanel from "./components/SettingsPanel";
 import TypingArea from "./components/TypingArea";
+import MonkeytypeArea from "./components/MonkeytypeArea";
 import ResultsModal from "./components/ResultsModal";
 import useAudioService from "./hooks/useAudioService";
 import useTimer from "./hooks/useTimer";
@@ -19,6 +20,7 @@ function App() {
   const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
   const [strictErrorMode, setStrictErrorMode] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
+  const [uiMode, setUiMode] = useState("classic"); // "classic" or "monkeytype"
   
   // Custom hooks
   const { playRandomNote, playCharacterNote, playErrorTone } = useAudioService();
@@ -131,6 +133,24 @@ function App() {
         <div className="curveHeading position-absolute"></div>
         <div className="col position-relative">
           <h1 className="text-white">Typing Tutor Theory</h1>
+          <div className="mt-3">
+            <div className="btn-group" role="group" aria-label="UI Mode Toggle">
+              <button
+                type="button"
+                className={`btn ${uiMode === "classic" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => setUiMode("classic")}
+              >
+                Classic UI
+              </button>
+              <button
+                type="button"
+                className={`btn ${uiMode === "monkeytype" ? "btn-primary" : "btn-outline-primary"}`}
+                onClick={() => setUiMode("monkeytype")}
+              >
+                Monkeytype UI
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -154,17 +174,32 @@ function App() {
         onStrictErrorModeChange={(e) => setStrictErrorMode(e.target.checked)}
       />
 
-      <TypingArea
-        inputRef={inputRef}
-        typedChar={typedChar}
-        charSet={charSet}
-        errorPositions={ttt.getErrorCharPositions()}
-        originalCharSetLength={ttt.getOriginalCharSetLength()}
-        shakerClass={shakerClass}
-        progressValue={progressValue}
-        onTypeAreaChange={typeAreaChange}
-        onReset={handleResetButton}
-      />
+      {uiMode === "classic" ? (
+        <TypingArea
+          inputRef={inputRef}
+          typedChar={typedChar}
+          charSet={charSet}
+          errorPositions={ttt.getErrorCharPositions()}
+          originalCharSetLength={ttt.getOriginalCharSetLength()}
+          shakerClass={shakerClass}
+          progressValue={progressValue}
+          onTypeAreaChange={typeAreaChange}
+          onReset={handleResetButton}
+        />
+      ) : (
+        <MonkeytypeArea
+          inputRef={inputRef}
+          typedChar={typedChar}
+          charSet={charSet}
+          originalCharSet={ttt.getOriginalCharSet()}
+          errorPositions={ttt.getErrorCharPositions()}
+          originalCharSetLength={ttt.getOriginalCharSetLength()}
+          shakerClass=""
+          progressValue={progressValue}
+          onTypeAreaChange={typeAreaChange}
+          onReset={handleResetButton}
+        />
+      )}
 
       <ResultsModal 
         isOpen={showResultsModal}

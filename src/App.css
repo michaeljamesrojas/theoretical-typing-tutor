@@ -36,3 +36,14 @@
     transform: rotate(360deg);
   }
 }
+
+@keyframes cursor-blink {
+  0%, 50% { 
+    opacity: 1; 
+    transform: scale(1);
+  }
+  51%, 100% { 
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}

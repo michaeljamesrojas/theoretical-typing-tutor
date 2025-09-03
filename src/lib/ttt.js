@@ -51,6 +51,10 @@ class TTT {
     return this.#charSet;
   }
 
+  getOriginalCharSet() {
+    return this.#originalGeneratedCharSet;
+  }
+
   getFirstLetter() {
     return this.#charSet.charAt(0);
   }
