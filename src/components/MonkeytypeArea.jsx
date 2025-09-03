@@ -41,17 +41,31 @@ const MonkeytypeArea = ({
       return <span style={{color: '#4CAF50'}}>Complete! 🎉</span>;
     }
 
-    // Show the full original text with proper styling based on typing progress
-    return originalCharSet.split('').map((char, index) => {
+    // Calculate characters per line (approximately) and lines to show
+    const charsPerLine = 50; // Approximate characters per line
+    const linesToShow = 3;
+    const totalCharsToShow = charsPerLine * linesToShow;
+    
+    // Calculate the start position for the visible text window
+    const currentLine = Math.floor(currentPosition / charsPerLine);
+    const startLine = Math.max(0, currentLine - 1); // Show current line and one above
+    const startIndex = startLine * charsPerLine;
+    const endIndex = Math.min(originalCharSet.length, startIndex + totalCharsToShow);
+    
+    // Get the visible portion of text
+    const visibleText = originalCharSet.slice(startIndex, endIndex);
+    
+    return visibleText.split('').map((char, relativeIndex) => {
+      const absoluteIndex = startIndex + relativeIndex;
       let style = { 
         display: 'inline-block',
-        minWidth: '0.6em',
+        minWidth: '0.8em',
         textAlign: 'center'
       };
       
-      if (index < currentPosition) {
+      if (absoluteIndex < currentPosition) {
         // Already typed characters
-        const isError = errorPositions.includes(index);
+        const isError = errorPositions.includes(absoluteIndex);
         if (isError) {
           style = { 
             ...style,
@@ -66,11 +80,11 @@ const MonkeytypeArea = ({
             color: '#4CAF50'
           };
         }
-      } else if (index === currentPosition) {
+      } else if (absoluteIndex === currentPosition) {
         // Current character to type (cursor position)
         style = { 
           ...style,
-          color: '#666',
+          color: '#e2e2e2',
           position: 'relative'
         };
       } else {
@@ -81,23 +95,29 @@ const MonkeytypeArea = ({
         };
       }
       
+      // Add line breaks approximately every charsPerLine characters
+      const shouldBreak = relativeIndex > 0 && relativeIndex % charsPerLine === 0;
+      
       return (
-        <span key={index} style={style}>
-          {char}
-          {index === currentPosition && (
-            <span 
-              style={{
-                position: 'absolute',
-                left: '0px',
-                top: '0px',
-                bottom: '0px',
-                width: '2px',
-                backgroundColor: '#ffeb3b',
-                animation: 'cursor-blink 1s infinite',
-                zIndex: 1
-              }}
-            />
-          )}
+        <span key={absoluteIndex}>
+          {shouldBreak && <br />}
+          <span style={style}>
+            {char}
+            {absoluteIndex === currentPosition && (
+              <span 
+                style={{
+                  position: 'absolute',
+                  left: '0px',
+                  top: '0px',
+                  bottom: '0px',
+                  width: '2px',
+                  backgroundColor: '#ffeb3b',
+                  animation: 'cursor-blink 1s infinite',
+                  zIndex: 1
+                }}
+              />
+            )}
+          </span>
         </span>
       );
     });
@@ -132,12 +152,15 @@ const MonkeytypeArea = ({
         <div 
           className="text-display"
           style={{
-            fontSize: '1.5rem',
-            lineHeight: '2rem',
-            fontFamily: 'monospace',
+            fontSize: '2rem',
+            lineHeight: '3rem',
+            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
             wordWrap: 'break-word',
             cursor: 'text',
-            color: '#e2e2e2'
+            color: '#e2e2e2',
+            textAlign: 'left',
+            maxHeight: '9rem', // 3 lines × 3rem line height
+            overflow: 'hidden'
           }}
         >
           {renderText()}

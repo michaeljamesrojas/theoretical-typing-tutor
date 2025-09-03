@@ -10,19 +10,19 @@ const ResultsModal = ({
   correctKeysTyped,
   onReset
 }) => {
-  const tryAgainButtonRef = useRef(null);
+  const closeButtonRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
-    if (isOpen && tryAgainButtonRef.current) {
+    if (isOpen && closeButtonRef.current) {
       // Disable the try again button for 1 second when modal opens
       setIsButtonDisabled(true);
 
-      // Re-enable the button after 1 second and focus it
+      // Re-enable the try again button after 1 second and focus the close button
       setTimeout(() => {
         setIsButtonDisabled(false);
-        tryAgainButtonRef.current?.focus();
-      }, 600);
+        closeButtonRef.current?.focus();
+      }, 400);
     }
   }, [isOpen]);
 
@@ -172,6 +172,7 @@ const ResultsModal = ({
             {/* Footer */}
             <div className="modal-footer border-0 pt-2" style={{ backgroundColor: '#2a2a2a' }}>
               <button 
+                ref={closeButtonRef}
                 type="button" 
                 className="btn btn-outline-light btn-sm me-2" 
                 onClick={onClose}
@@ -180,7 +181,6 @@ const ResultsModal = ({
                 Close
               </button>
               <button 
-                ref={tryAgainButtonRef}
                 type="button" 
                 className="btn btn-primary btn-sm" 
                 disabled={isButtonDisabled}
