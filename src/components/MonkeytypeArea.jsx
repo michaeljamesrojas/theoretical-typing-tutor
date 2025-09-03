@@ -34,16 +34,15 @@ const MonkeytypeArea = ({
   
   const renderText = () => {
     if (!originalCharSet) {
-      return <span className="text-muted">Loading...</span>;
+      return <span style={{color: '#666'}}>Loading...</span>;
     }
     
     if (charSet.length === 0) {
-      return <span className="text-success">Complete! 🎉</span>;
+      return <span style={{color: '#4CAF50'}}>Complete! 🎉</span>;
     }
 
     // Show the full original text with proper styling based on typing progress
     return originalCharSet.split('').map((char, index) => {
-      let className = '';
       let style = { 
         display: 'inline-block',
         minWidth: '0.6em',
@@ -54,32 +53,51 @@ const MonkeytypeArea = ({
         // Already typed characters
         const isError = errorPositions.includes(index);
         if (isError) {
-          className = 'text-danger';
           style = { 
             ...style,
-            backgroundColor: 'rgba(220, 53, 69, 0.2)',
-            borderRadius: '3px'
+            color: '#ff6b6b',
+            backgroundColor: 'rgba(255, 107, 107, 0.15)',
+            borderRadius: '3px',
+            textDecoration: 'underline'
           };
         } else {
-          className = 'text-success';
+          style = {
+            ...style,
+            color: '#4CAF50'
+          };
         }
       } else if (index === currentPosition) {
         // Current character to type (cursor position)
-        className = 'bg-warning text-dark';
         style = { 
           ...style,
-          animation: 'cursor-blink 1s infinite',
-          borderRadius: '3px',
-          boxShadow: '0 0 0 2px rgba(255, 193, 7, 0.3)'
+          color: '#666',
+          position: 'relative'
         };
       } else {
         // Not yet typed
-        className = 'text-muted';
+        style = {
+          ...style,
+          color: '#666'
+        };
       }
       
       return (
-        <span key={index} className={className} style={style}>
+        <span key={index} style={style}>
           {char}
+          {index === currentPosition && (
+            <span 
+              style={{
+                position: 'absolute',
+                left: '0px',
+                top: '0px',
+                bottom: '0px',
+                width: '2px',
+                backgroundColor: '#ffeb3b',
+                animation: 'cursor-blink 1s infinite',
+                zIndex: 1
+              }}
+            />
+          )}
         </span>
       );
     });
@@ -91,7 +109,7 @@ const MonkeytypeArea = ({
         className={`monkeytype-area position-relative ${shakerClass}`}
         style={{
           minHeight: '200px',
-          backgroundColor: 'rgba(0,0,0,0.1)',
+          backgroundColor: 'transparent',
           borderRadius: '12px',
           padding: '40px',
           margin: '20px 0'
@@ -118,7 +136,8 @@ const MonkeytypeArea = ({
             lineHeight: '2rem',
             fontFamily: 'monospace',
             wordWrap: 'break-word',
-            cursor: 'text'
+            cursor: 'text',
+            color: '#e2e2e2'
           }}
         >
           {renderText()}
@@ -134,14 +153,28 @@ const MonkeytypeArea = ({
       {/* Progress bar */}
       <div className="row justify-content-center mb-3">
         <div className="col-8">
-          <div className="progress" style={{ height: '8px' }}>
+          <div 
+            className="progress" 
+            style={{ 
+              height: '8px', 
+              backgroundColor: '#404040',
+              borderRadius: '2px'
+            }}
+          >
             <div 
-              className="progress-bar bg-success" 
+              className="progress-bar" 
               role="progressbar" 
-              style={{ width: `${progressValue}%` }}
+              style={{ 
+                width: `${progressValue}%`,
+                backgroundColor: '#4a9eff',
+                borderRadius: '2px'
+              }}
             ></div>
           </div>
-          <div className="text-center mt-2 text-muted small">
+          <div 
+            className="text-center mt-2 small"
+            style={{color: '#888'}}
+          >
             {Math.round(progressValue)}% complete
           </div>
         </div>
@@ -151,9 +184,14 @@ const MonkeytypeArea = ({
       <div className="row justify-content-center">
         <div className="col-auto">
           <button 
-            className="btn btn-outline-primary"
+            className="btn btn-outline-light btn-sm"
             onClick={onReset}
             title="Reset Timer and WPM"
+            style={{
+              backgroundColor: 'transparent',
+              borderColor: '#4a9eff',
+              color: '#4a9eff'
+            }}
           >
             Reset ↻
           </button>

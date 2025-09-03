@@ -5,7 +5,8 @@
       "Bash(npm install)",
       "Read(C:\\Users\\micha\\Downloads/**)",
       "Bash(git show-branch:*)",
-      "Bash(npm run deploy:*)"
+      "Bash(npm run deploy:*)",
+      "Read(C:\\Users\\micha\\Downloads/**)"
     ],
     "deny": [],
     "ask": []

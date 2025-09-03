@@ -20,7 +20,8 @@ function App() {
   const [returnCharSetAmount, setReturnCharSetAmount] = useState(1);
   const [strictErrorMode, setStrictErrorMode] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
-  const [uiMode, setUiMode] = useState("classic"); // "classic" or "monkeytype"
+  const [uiMode, setUiMode] = useState("monkeytype"); // "classic" or "monkeytype"
+  const [selectedTime, setSelectedTime] = useState(30);
   
   // Custom hooks
   const { playRandomNote, playCharacterNote, playErrorTone } = useAudioService();
@@ -35,7 +36,7 @@ function App() {
     incrementTotalKeys,
     incrementCorrectKeys,
     getCurrentWPM
-  } = useTimer(30);
+  } = useTimer(selectedTime);
 
   useEffect(() => {
     ttt.setTrainingCharacters(trainingCharacters, generatorType);
@@ -127,6 +128,11 @@ function App() {
   const currentWPM = getCurrentWPM();
   const accuracy = totalKeysTyped > 0 ? Math.round((correctKeysTyped / totalKeysTyped) * 100) : 100;
 
+  const handleTimeSelection = (time) => {
+    setSelectedTime(time);
+    resetTimer();
+  };
+
   return (
     <>
       <div className="row m-4 mb-5 text-center position-relative">
@@ -137,14 +143,14 @@ function App() {
             <div className="btn-group" role="group" aria-label="UI Mode Toggle">
               <button
                 type="button"
-                className={`btn ${uiMode === "classic" ? "btn-primary" : "btn-outline-primary"}`}
+                className={`btn btn-sm ${uiMode === "classic" ? "btn-outline-light" : "btn-outline-secondary"}`}
                 onClick={() => setUiMode("classic")}
               >
                 Classic UI
               </button>
               <button
                 type="button"
-                className={`btn ${uiMode === "monkeytype" ? "btn-primary" : "btn-outline-primary"}`}
+                className={`btn btn-sm ${uiMode === "monkeytype" ? "btn-primary" : "btn-outline-secondary"}`}
                 onClick={() => setUiMode("monkeytype")}
               >
                 Monkeytype UI
@@ -154,25 +160,91 @@ function App() {
         </div>
       </div>
 
-      <Timer
-        timeRemaining={timeRemaining}
-        timerActive={timerActive}
-        timerFinished={timerFinished}
-        rawWPM={currentWPM.raw}
-        netWPM={currentWPM.net}
-      />
+      {uiMode === "monkeytype" && (
+        <div className="container-fluid mb-4">
+          <div className="row justify-content-center">
+            <div className="col-auto">
+              <div className="d-flex gap-2 align-items-center mb-3">
+                <div className="btn-group" role="group">
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${selectedTime === 15 ? "btn-secondary" : "btn-outline-secondary"}`}
+                    onClick={() => handleTimeSelection(15)}
+                  >
+                    15s
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${selectedTime === 30 ? "btn-secondary" : "btn-outline-secondary"}`}
+                    onClick={() => handleTimeSelection(30)}
+                  >
+                    30s
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn btn-sm ${selectedTime === 60 ? "btn-secondary" : "btn-outline-secondary"}`}
+                    onClick={() => handleTimeSelection(60)}
+                  >
+                    60s
+                  </button>
+                </div>
+                <div className="d-flex align-items-center gap-3 ms-3">
+                  <select 
+                    className="form-select form-select-sm" 
+                    style={{width: 'auto', backgroundColor: '#2d2d2d', color: '#e2e2e2', border: '1px solid #404040'}}
+                    value={generatorType}
+                    onChange={generatorTypeChange}
+                  >
+                    <option value={0}>KEY SEQUENCE</option>
+                    <option value={1}>RANDOM WORDS</option>
+                  </select>
+                  <input 
+                    type="text" 
+                    className="form-control form-control-sm"
+                    style={{width: '200px', backgroundColor: '#2d2d2d', color: '#e2e2e2', border: '1px solid #404040'}}
+                    value={trainingCharacters}
+                    onChange={trainingCharactersChange}
+                    placeholder="Training characters"
+                  />
+                  <input 
+                    type="number" 
+                    className="form-control form-control-sm"
+                    style={{width: '60px', backgroundColor: '#2d2d2d', color: '#e2e2e2', border: '1px solid #404040'}}
+                    value={returnCharSetAmount}
+                    onChange={handleReturnCharSetAmountChange}
+                    min="1"
+                    max="10"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-      <SettingsPanel
-        generatorType={generatorType}
-        trainingCharacters={trainingCharacters}
-        returnCharSetAmount={returnCharSetAmount}
-        strictErrorMode={strictErrorMode}
-        modes={ttt.getModes()}
-        onGeneratorTypeChange={generatorTypeChange}
-        onTrainingCharactersChange={trainingCharactersChange}
-        onReturnCharSetAmountChange={handleReturnCharSetAmountChange}
-        onStrictErrorModeChange={(e) => setStrictErrorMode(e.target.checked)}
-      />
+      {uiMode === "classic" && (
+        <>
+          <Timer
+            timeRemaining={timeRemaining}
+            timerActive={timerActive}
+            timerFinished={timerFinished}
+            rawWPM={currentWPM.raw}
+            netWPM={currentWPM.net}
+          />
+
+          <SettingsPanel
+            generatorType={generatorType}
+            trainingCharacters={trainingCharacters}
+            returnCharSetAmount={returnCharSetAmount}
+            strictErrorMode={strictErrorMode}
+            modes={ttt.getModes()}
+            onGeneratorTypeChange={generatorTypeChange}
+            onTrainingCharactersChange={trainingCharactersChange}
+            onReturnCharSetAmountChange={handleReturnCharSetAmountChange}
+            onStrictErrorModeChange={(e) => setStrictErrorMode(e.target.checked)}
+          />
+        </>
+      )}
 
       {uiMode === "classic" ? (
         <TypingArea
