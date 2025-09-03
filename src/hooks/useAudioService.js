@@ -102,22 +102,10 @@ const useAudioService = () => {
   }, [getCharacterNote, useLeftHand, playNote]);
 
   const playErrorTone = useCallback(() => {
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.type = 'sawtooth';
-    oscillator.frequency.setValueAtTime(120, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(80, audioContext.currentTime + 0.2);
-    
-    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + 0.2);
-  }, [audioContext]);
+    // Use a low bass note (C2) for error feedback
+    const errorNote = 130.81; // C2 - lowest note from left hand range
+    playNote(errorNote);
+  }, [playNote]);
 
   return {
     playNote,
