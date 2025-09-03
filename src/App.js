@@ -161,7 +161,7 @@ function App() {
       </div>
 
       {uiMode === "monkeytype" && (
-        <div className="container-fluid mb-4">
+        <div className="container-fluid mb-4" style={{marginTop: '4rem'}}>
           <div className="row justify-content-center">
             <div className="col-auto">
               <div className="d-flex gap-2 align-items-center mb-3">

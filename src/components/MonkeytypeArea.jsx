@@ -41,14 +41,15 @@ const MonkeytypeArea = ({
       return <span style={{color: '#4CAF50'}}>Complete! 🎉</span>;
     }
 
-    // Calculate characters per line (approximately) and lines to show
-    const charsPerLine = 50; // Approximate characters per line
+    // Split text into words for better wrapping
+    const words = originalCharSet.split(' ');
+    const charsPerLine = 50;
     const linesToShow = 3;
     const totalCharsToShow = charsPerLine * linesToShow;
     
     // Calculate the start position for the visible text window
     const currentLine = Math.floor(currentPosition / charsPerLine);
-    const startLine = Math.max(0, currentLine - 1); // Show current line and one above
+    const startLine = Math.max(0, currentLine - 1);
     const startIndex = startLine * charsPerLine;
     const endIndex = Math.min(originalCharSet.length, startIndex + totalCharsToShow);
     
@@ -85,7 +86,8 @@ const MonkeytypeArea = ({
         style = { 
           ...style,
           color: '#e2e2e2',
-          position: 'relative'
+          position: 'relative',
+          backgroundColor: 'rgba(255, 235, 59, 0.1)'
         };
       } else {
         // Not yet typed
@@ -107,13 +109,14 @@ const MonkeytypeArea = ({
               <span 
                 style={{
                   position: 'absolute',
-                  left: '0px',
+                  left: '-1px',
                   top: '0px',
-                  bottom: '0px',
+                  height: '100%',
                   width: '2px',
                   backgroundColor: '#ffeb3b',
                   animation: 'cursor-blink 1s infinite',
-                  zIndex: 1
+                  zIndex: 10,
+                  borderRadius: '1px'
                 }}
               />
             )}
@@ -158,9 +161,10 @@ const MonkeytypeArea = ({
             wordWrap: 'break-word',
             cursor: 'text',
             color: '#e2e2e2',
-            textAlign: 'left',
-            maxHeight: '9rem', // 3 lines × 3rem line height
-            overflow: 'hidden'
+            textAlign: 'center',
+            maxHeight: '9rem',
+            overflow: 'hidden',
+            whiteSpace: 'pre-wrap'
           }}
         >
           {renderText()}

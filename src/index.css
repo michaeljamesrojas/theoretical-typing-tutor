@@ -1,15 +1,21 @@
-body {
+html, body {
   margin: 0;
+  padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
     "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 #root {
+  min-height: 100vh;
   height: 100vh;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%);
   color: #e2e2e2;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 code {
@@ -21,10 +27,11 @@ div[role="progressbar"] {
 }
 
 .curveHeading {
-  height: 200%;
-  min-width: 120% !important;
+  height: 160%;
+  width: 150% !important;
+  max-width: 150% !important;
   top: -2rem;
-  left: -10%;
+  left: -25%;
   background: linear-gradient(180deg, #323437 0%, #2d2d2d 100%);
   border-bottom-left-radius: 130%;
   border-bottom-right-radius: 130%;
