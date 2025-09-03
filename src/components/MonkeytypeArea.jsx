@@ -41,86 +41,75 @@ const MonkeytypeArea = ({
       return <span style={{color: '#4CAF50'}}>Complete! 🎉</span>;
     }
 
-    // Split text into words for better wrapping
     const words = originalCharSet.split(' ');
-    const charsPerLine = 50;
-    const linesToShow = 3;
-    const totalCharsToShow = charsPerLine * linesToShow;
     
-    // Calculate the start position for the visible text window
-    const currentLine = Math.floor(currentPosition / charsPerLine);
-    const startLine = Math.max(0, currentLine - 1);
-    const startIndex = startLine * charsPerLine;
-    const endIndex = Math.min(originalCharSet.length, startIndex + totalCharsToShow);
-    
-    // Get the visible portion of text
-    const visibleText = originalCharSet.slice(startIndex, endIndex);
-    
-    return visibleText.split('').map((char, relativeIndex) => {
-      const absoluteIndex = startIndex + relativeIndex;
-      let style = { 
-        display: 'inline-block',
-        minWidth: '0.8em',
-        textAlign: 'center'
-      };
-      
-      if (absoluteIndex < currentPosition) {
-        // Already typed characters
-        const isError = errorPositions.includes(absoluteIndex);
-        if (isError) {
-          style = { 
-            ...style,
-            color: '#ff6b6b',
-            backgroundColor: 'rgba(255, 107, 107, 0.15)',
-            borderRadius: '3px',
-            textDecoration: 'underline'
-          };
-        } else {
-          style = {
-            ...style,
-            color: '#4CAF50'
-          };
-        }
-      } else if (absoluteIndex === currentPosition) {
-        // Current character to type (cursor position)
-        style = { 
-          ...style,
-          color: '#e2e2e2',
-          position: 'relative',
-          backgroundColor: 'rgba(255, 235, 59, 0.1)'
-        };
-      } else {
-        // Not yet typed
-        style = {
-          ...style,
-          color: '#666'
-        };
-      }
-      
-      // Add line breaks approximately every charsPerLine characters
-      const shouldBreak = relativeIndex > 0 && relativeIndex % charsPerLine === 0;
-      
+    return words.map((word, wordIndex) => {
+      const wordWithSpace = wordIndex < words.length - 1 ? word + ' ' : word;
+      const startIndex = originalCharSet.indexOf(wordWithSpace, (wordIndex > 0 ? originalCharSet.indexOf(words[wordIndex-1]) : 0));
+
       return (
-        <span key={absoluteIndex}>
-          {shouldBreak && <br />}
-          <span style={style}>
-            {char}
-            {absoluteIndex === currentPosition && (
-              <span 
-                style={{
-                  position: 'absolute',
-                  left: '-1px',
-                  top: '0px',
-                  height: '100%',
-                  width: '2px',
-                  backgroundColor: '#ffeb3b',
-                  animation: 'cursor-blink 1s infinite',
-                  zIndex: 10,
-                  borderRadius: '1px'
-                }}
-              />
-            )}
-          </span>
+        <span key={wordIndex} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+          {wordWithSpace.split('').map((char, charIndex) => {
+            const absoluteIndex = startIndex + charIndex;
+            let style = { 
+              display: 'inline-block',
+              minWidth: '0.8em',
+              textAlign: 'center'
+            };
+            
+            if (absoluteIndex < currentPosition) {
+              const isError = errorPositions.includes(absoluteIndex);
+              if (isError) {
+                style = { 
+                  ...style,
+                  color: '#ff6b6b',
+                  backgroundColor: 'rgba(255, 107, 107, 0.15)',
+                  borderRadius: '3px',
+                  textDecoration: 'underline'
+                };
+              } else {
+                style = {
+                  ...style,
+                  color: '#4CAF50'
+                };
+              }
+            } else if (absoluteIndex === currentPosition) {
+              style = { 
+                ...style,
+                color: '#e2e2e2',
+                position: 'relative',
+                backgroundColor: 'rgba(255, 235, 59, 0.1)'
+              };
+            } else {
+              style = {
+                ...style,
+                color: '#666'
+              };
+            }
+            
+            return (
+              <span key={charIndex}>
+                <span style={style}>
+                  {char}
+                  {absoluteIndex === currentPosition && (
+                    <span 
+                      style={{
+                        position: 'absolute',
+                        left: '-1px',
+                        top: '0px',
+                        height: '100%',
+                        width: '2px',
+                        backgroundColor: '#ffeb3b',
+                        animation: 'cursor-blink 1s infinite',
+                        zIndex: 10,
+                        borderRadius: '1px'
+                      }}
+                    />
+                  )}
+                </span>
+              </span>
+            );
+          })}
         </span>
       );
     });
@@ -158,13 +147,11 @@ const MonkeytypeArea = ({
             fontSize: '2rem',
             lineHeight: '3rem',
             fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-            wordWrap: 'break-word',
             cursor: 'text',
             color: '#e2e2e2',
             textAlign: 'center',
             maxHeight: '9rem',
-            overflow: 'hidden',
-            whiteSpace: 'pre-wrap'
+            overflow: 'hidden'
           }}
         >
           {renderText()}
