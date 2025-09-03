@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm start)",
       "Bash(npm install)",
-      "Read(C:\\Users\\micha\\Downloads/**)"
+      "Read(C:\\Users\\micha\\Downloads/**)",
+      "Bash(git show-branch:*)"
     ],
     "deny": [],
     "ask": []
